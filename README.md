@@ -34,13 +34,9 @@ namespace readData
     public class Person
     {
         public int PersonId { get; set; }
-
         public string Name { get; set; }
-
         public string Surname { get; set; }
-
         public DateTime DOB { get; set; }
-        
     }
 }
 ```
@@ -63,13 +59,65 @@ namespace readData
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){
             optionsBuilder.UseSqlServer(connectionString);
         }
-
         public DbSet<Person> Person {get; set;}
     }
 }
 ```
 
 Suponiendo que tenemos una BBDD con esta tabla y estos datos
+![image](https://user-images.githubusercontent.com/66184823/110460218-3114d800-80ce-11eb-820a-5b141e3fb98f.png)
+
+Como es una aplicación de consola, desde la clase program nos traemos los datos usando el contexto de la BBDD
+
+```C#
+static void Main(string[] args)
+        {
+            using(var context = new AplicationContext()){
+                var persons = context.Person.AsNoTracking(); //Array IQuerable
+
+                foreach (var person in persons){
+                    System.Console.WriteLine(person.Name);
+                }
+            }
+        }
+```
+
+Si lo ejecutamos vemos el siguiente resultado
+![image](https://user-images.githubusercontent.com/66184823/110460455-7e914500-80ce-11eb-8e63-77daa8dc1479.png)
+
+###Relaciones
+
+Ahora añadimos una segunda tabla que tendrá como clave foranea la clave primaria de la tabla Person
+![image](https://user-images.githubusercontent.com/66184823/110462442-fbbdb980-80d0-11eb-83f1-b7bc647f53f7.png)
+
+```SQL
+ALTER TABLE dbo.[Address] ADD CONSTRAINT FK_Address_Persons_personId 
+	FOREIGN KEY(PersonId) REFERENCES dbo.Person (PersonId);
+```
+
+Creamos la clase Addres referencia a la tabla Person
+
+```C#
+namespace readData
+{
+    public class Address
+    {
+        public int AddressId { get; set; }
+        public string Line1 { get; set; }
+        public string Line1 { get; set; }
+        public string Town { get; set; }
+        public int PersonId { get; set; }
+        public virtual Person Person {get; set;}
+    }
+}
+```
+
+Y en la clase Person añadimos una referencia a Address para poder obtener datos de dicha tabla
+
+```C#
+public virtual Address Address {get; set;}
+```
+
 
 
 
